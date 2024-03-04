@@ -32,6 +32,21 @@ else:
 
     os.environ["OPENAI_API_KEY"] = openai_api_key
 
+def execut():
+    llm = ChatOpenAI(model_name=model_name, temperature=temperature, top_p=top_p, streaming=True)
+    tools = [DuckDuckGoSearchRun(name="Search")]
+    chat_agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, 
+                                                                tools=tools,
+                                                                system_message=sys_prompt,
+                                                                verbose=True,)
+    executor = AgentExecutor.from_agent_and_tools(
+            agent=chat_agent,
+            tools=tools,
+            memory=memory,
+            return_intermediate_steps=True,
+            handle_parsing_errors=True,
+        )
+    return executor
 
 if openai_api_key:
     # Execute the home page function
@@ -87,23 +102,12 @@ if openai_api_key:
             st.info("Please add your OpenAI API key to continue.")
             st.stop()
 
-        llm = ChatOpenAI(model_name=model_name, temperature=temperature, top_p=top_p, streaming=True)
-        tools = [DuckDuckGoSearchRun(name="Search")]
-        chat_agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, 
-                                                                tools=tools,
-                                                                system_message=sys_prompt,
-                                                                verbose=True,)
-        executor = AgentExecutor.from_agent_and_tools(
-            agent=chat_agent,
-            tools=tools,
-            memory=memory,
-            return_intermediate_steps=True,
-            handle_parsing_errors=True,
-        )
+        
         with st.chat_message("assistant"):
             st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
             cfg = RunnableConfig()
             cfg["callbacks"] = [st_cb]
+            executor = execut()
             response = executor.invoke(prompt, cfg)
             st.write(response["output"])
             st.session_state.steps[str(len(msgs.messages) - 1)] = response["intermediate_steps"]
