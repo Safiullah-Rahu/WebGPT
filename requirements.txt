@@ -3,3 +3,4 @@ langchain_openai
 langchain_community
 streamlit
 openai
+duckduckgo-search
