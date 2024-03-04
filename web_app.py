@@ -8,7 +8,9 @@ from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.runnables import RunnableConfig
-
+import asyncio
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 global openai_api_key
 st.set_page_config(page_title="General Web Chatbot", layout="wide")
 st.markdown(
